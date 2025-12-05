@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SignalX Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #000000;
+      color: #ffffff;
+      overscroll-behavior-y: none;
+      overflow-y: auto;
+    }
+    .page-transition {
+      animation: pageFadeIn 0.5s ease-out;
+    }
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .landing-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .landing-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, #111827 0%, #000000 70%);
+      opacity: 0.5;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      padding: 1.5rem;
+      text-align: center;
+      margin-top: 2.5rem;
+    }
+    .connect-btn {
+      width: 100%;
+      background: #2563eb;
+      transition: all 0.2s;
+    }
+    .connect-btn:hover {
+      background: #1d4ed8;
+    }
+    .connect-btn:active {
+      transform: scale(0.95);
+    }
+    .social-footer {
+      width: 100%;
+      padding: 1.5rem 1rem;
+      background: linear-gradient(to top, #000000 0%, #111827 50%, transparent 100%);
+    }
+    .dashboard {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #000000;
+      color: white;
+      position: relative;
+      overflow-y: auto;
+    }
+    .dashboard.active {
+      display: flex;
+    }
+    .dashboard-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #374151;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    .content-height {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 5rem;
+      max-height: calc(100vh - 140px);
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid #374151;
+      padding: 0.5rem 1.5rem 0.5rem 1.5rem;
+      z-index: 50;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .nav-item.active {
+      color: #3b82f6;
+      transform: scale(1.1);
+    }
+    .nav-item:not(.active) {
+      color: #6b7280;
+    }
+    .nav-item:not(.active):hover {
+      color: #9ca3af;
+    }
+    .notification-badge {
+      position: absolute;
+      top: -0.5rem;
+      right: -0.5rem;
+      background: #dc2626;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      height: 1rem;
+      width: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      animation: pulse 2s infinite;
+      border: 1px solid #000000;
+    }
+    .notification-badge.hidden {
+      display: none;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+    .tab-content {
+      display: none;
+      padding: 1rem;
+      min-height: 100%;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .main-banner-card {
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      border: 1px solid #374151;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 0.75rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .traders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .trader-card {
+      background: #111827;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid #374151;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .trader-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .trader-profile-img {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #374151;
+    }
+    .success-rate-bar {
+      height: 5px;
+      background: #374151;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.25rem;
+    }
+    .success-rate-fill {
+      height: 100%;
+      transition: width 0.5s ease;
+      border-radius: 2px;
+    }
+    .success-rate-fill.high {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+    }
+    .success-rate-fill.medium {
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+    .success-rate-fill.low {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+    }
+    .chart-container {
+      width: 100%;
+      height: 50px;
+      margin-top: 0.25rem;
+    }
+    .mini-chart {
+      width: 100%;
+      height: 100%;
+    }
+    .social-icons {
+      display: flex;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+    }
+    .social-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #374151;
+      color: #9ca3af;
+      font-size: 0.6rem;
+    }
+    .follow-btn-small {
+      background: #2563eb;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.25rem;
+    }
+    .follow-btn-small:hover {
+      background: #1d4ed8;
+    }
+    .follow-btn-small.following {
+      background: #374151;
+    }
+    .reaction-btns {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .reaction-item {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+    .reaction-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: #1f2937;
+      border: 1px solid #374151;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+    .reaction-btn.active.like {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: white;
+    }
+    .reaction-btn.active.dislike {
+      background: #ef4444;
+      border-color: #ef4444;
+      color: white;
+    }
+    .trade-card {
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    .trade-card.sell {
+      border-left: 4px solid #ef4444;
+    }
+    .trade-card.buy {
+      border-left: 4px solid #22c55e;
+    }
+    .following-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .following-card {
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .following-card:hover {
+      background: #1f2937;
+      border-color: #3b82f6;
+    }
+    .following-card-img {
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .new-signals-indicator {
+      background: #ef4444;
+      color: white;
+      border-radius: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: bold;
+      animation: pulse 2s infinite;
+    }
+    .live-signal-icon {
+      width: 0.4rem;
+      height: 0.4rem;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+    .trader-signals-header {
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .sub-tabs-container {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .sub-tab {
+      flex: 1;
+      padding: 0.5rem;
+      text-align: center;
+      background: #1f2937;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+    .sub-tab.active {
+      background: #3b82f6;
+      color: white;
+    }
+    .support-page {
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: #000;
+    }
+    .support-header {
+      padding: 1rem;
+      border-bottom: 1px solid #374151;
+      font-weight: bold;
+      text-align: center;
+    }
+    .support-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .support-message {
+      max-width: 70%;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      line-height: 1.4;
+    }
+    .support-message.received {
+      background: #1f2937;
+      align-self: flex-start;
+    }
+    .support-message.sent {
+      background: #2563eb;
+      align-self: flex-end;
+      color: white;
+    }
+    .support-input-area {
+      display: flex;
+      padding: 1rem;
+      gap: 0.5rem;
+      border-top: 1px solid #374151;
+    }
+    .support-input {
+      flex: 1;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 2rem;
+      padding: 0.75rem 1rem;
+      color: white;
+      outline: none;
+    }
+    .support-send-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .actions-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+    .reactions-and-follow {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    /* Trading Tab Toolbar */
+    .trading-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .trading-toolbar-btn {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #e5e7eb;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .trading-toolbar-btn:hover {
+      background: #374151;
+      color: white;
+    }
+    .trading-toolbar-btn.active {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: white;
+    }
+
+    .trade-search-input {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 0.75rem;
+      color: white;
+      margin-bottom: 1.25rem;
+    }
+    .trade-search-input::placeholder {
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body class="bg-black text-white">
+<!-- ========== LANDING PAGE ========== -->
+<div id="landingPage" class="landing-page page-transition">
+  <div class="landing-bg"></div>
+  <div class="main-content">
+    <div class="mb-10">
+      <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-400 mb-6 drop-shadow-lg">SIGNALX PRO</h1>
+      <h2 id="landingTitle" class="text-2xl font-bold text-white mb-3">Join Us for Free</h2>
+      <p id="landingDesc" class="text-gray-400 text-lg leading-relaxed max-w-xs mx-auto">The strongest trades on the Quotex platform</p>
+    </div>
+    <div class="w-full max-w-sm mb-8">
+      <button id="connectBtn" class="connect-btn group w-full text-white font-bold py-4 px-6 rounded-2xl shadow-[0_0_30px_rgba(37,99,235,0.4)] flex items-center justify-between border border-blue-500/50">
+        <div class="flex items-center gap-4">
+          <div class="bg-white/20 p-2.5 rounded-full backdrop-blur-sm">
+            <i class="fas fa-paper-plane text-white text-xl"></i>
+          </div>
+          <div class="flex flex-col items-start">
+            <span id="connectSubtext" class="text-xs text-blue-200 font-medium">Follow on Telegram</span>
+            <span class="text-lg font-bold tracking-wide">@TraderUser123</span>
+          </div>
+        </div>
+        <div class="bg-blue-500/30 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+        </div>
+      </button>
+    </div>
+  </div>
+  <div class="social-footer">
+    <div class="flex flex-col items-center gap-5">
+      <div class="flex items-center gap-2">
+        <span id="followUs" class="text-gray-400 text-sm font-bold tracking-wider">Follow us on</span>
+      </div>
+      <div class="flex gap-6 mb-2">
+        <button class="group p-3.5 bg-gray-900 rounded-2xl border border-gray-800 hover:border-pink-600 hover:bg-pink-900/20 transition-all duration-300 text-gray-400 hover:text-pink-500 hover:shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+          <i class="fab fa-instagram text-2xl"></i>
+        </button>
+        <button class="group p-3.5 bg-gray-900 rounded-2xl border border-gray-800 hover:border-blue-600 hover:bg-blue-900/20 transition-all duration-300 text-gray-400 hover:text-blue-500 hover:shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+          <i class="fab fa-facebook text-2xl"></i>
+        </button>
+        <button class="group p-3.5 bg-gray-900 rounded-2xl border border-gray-800 hover:border-white hover:bg-gray-800 transition-all duration-300 text-gray-400 hover:text-white hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+          <i class="fab fa-tiktok text-2xl"></i>
+        </button>
+      </div>
+      <div class="text-[10px] text-gray-700 font-mono">© 2024 All Rights Reserved</div>
+    </div>
+  </div>
+</div>
+<!-- ========== DASHBOARD ========== -->
+<div id="dashboard" class="dashboard">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <h1 class="font-black text-xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">SIGNALX PRO</h1>
+    <div id="headerTitle" class="text-sm font-bold text-gray-300"></div>
+    <button id="langToggle" class="flex items-center gap-2 px-3 py-1.5 bg-gray-800 rounded-lg text-sm hover:bg-gray-700 transition-colors">
+      <i class="fas fa-language text-lg"></i>
+      <span id="langText">العربية</span>
+    </button>
+  </header>
+  <!-- Content Area -->
+  <main class="content-height">
+    <!-- Home Tab -->
+    <div id="homeTab" class="tab-content active">
+      <!-- Main Banner -->
+      <div class="main-banner-card">
+        <h2 id="platformTitle" class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-400 text-center">Elite Traders Platform</h2>
+        <p id="platformDesc" class="text-gray-400 text-center mt-2">Browse top traders and follow their signals live</p>
+        <div class="stats-grid mt-2">
+          <div class="stat-item">
+            <div class="text-xl font-bold text-emerald-400">2,150</div>
+            <div id="winningTrades" class="text-xs text-gray-500">Winning Trades</div>
+          </div>
+          <div class="stat-item">
+            <div class="text-xl font-bold text-red-400">187</div>
+            <div id="losingTrades" class="text-xs text-gray-500">Losing Trades</div>
+          </div>
+        </div>
+        <div class="stats-grid mt-2">
+          <div class="stat-item">
+            <div class="text-xl font-bold text-blue-400">842</div>
+            <div id="activeTraders" class="text-xs text-gray-500">Active Traders</div>
+          </div>
+          <div class="stat-item">
+            <div class="text-xl font-bold text-amber-400">12,947</div>
+            <div id="totalUsers" class="text-xs text-gray-500">Total Users</div>
+          </div>
+        </div>
+      </div>
+      <!-- Traders List -->
+      <div class="traders-list" id="tradersList"></div>
+    </div>
+    <!-- Trader Signals Tab -->
+    <div id="traderSignalsTab" class="tab-content">
+      <div class="trader-signals-header">
+        <div class="flex items-center gap-3">
+          <img id="signalsTraderImage" class="following-card-img" src="" alt="">
+          <div>
+            <h3 id="signalsTraderName" class="font-bold text-white"></h3>
+            <p id="liveSignals" class="text-gray-400 text-xs">Live Signals</p>
+          </div>
+        </div>
+      </div>
+      <div class="sub-tabs-container">
+        <button id="activeTraderSignalsBtn" class="sub-tab active" onclick="showTraderSignalsSubTab('active')">Current Trades</button>
+        <button id="historyTraderSignalsBtn" class="sub-tab" onclick="showTraderSignalsSubTab('history')">Previous Results</button>
+      </div>
+      <div id="activeTraderSignals">
+        <div id="traderActiveSignalsList"></div>
+      </div>
+      <div id="traderSignalsHistory" style="display: none;">
+        <div id="traderSignalsHistoryList"></div>
+      </div>
+    </div>
+    <!-- Trading Tab -->
+    <div id="tradingTab" class="tab-content">
+      <div class="trading-toolbar">
+        <button id="timeframeBtn" class="trading-toolbar-btn">Timeframe</button>
+        <button id="indicatorsBtn" class="trading-toolbar-btn">Indicators</button>
+      </div>
+      <input type="text" class="trade-search-input" id="tradeSearch" placeholder="Search for currency pair..." />
+      <div id="tradeSignalsContainer"></div>
+    </div>
+    <!-- Support Tab -->
+    <div id="supportTab" class="tab-content">
+      <div class="support-page">
+        <div class="support-header" id="supportHeader">Technical Support</div>
+        <div class="support-messages" id="supportMessages">
+          <div class="support-message received" id="supportWelcome">Hello! How can we help you today?</div>
+          <div class="support-message received" id="supportDesc">You can report an issue or request help with signals.</div>
+        </div>
+        <div class="support-input-area">
+          <input type="text" class="support-input" id="supportMessageInput" placeholder="Type your message..." />
+          <button class="support-send-btn" onclick="sendSupportMessage()">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <div class="flex justify-between items-center max-w-md mx-auto">
+      <button class="nav-item active" onclick="showMainTab('home')">
+        <i class="fas fa-home text-xl"></i>
+        <span id="navHome" class="text-[10px] font-medium">Home</span>
+      </button>
+      <button class="nav-item relative" onclick="showMainTab('trading')">
+        <i class="fas fa-chart-line text-xl"></i>
+        <span id="tradingBadge" class="notification-badge">3</span>
+        <span id="navTrading" class="text-[10px] font-medium">Trading</span>
+      </button>
+      <!-- Removed Following Tab -->
+      <button class="nav-item relative" onclick="showMainTab('support')">
+        <i class="fas fa-headset text-xl"></i>
+        <span id="supportBadge" class="notification-badge">1</span>
+        <span id="navSupport" class="text-[10px] font-medium">Support</span>
+      </button>
+    </div>
+  </nav>
+</div>
+<script>
+  // ========== TRANSLATIONS ==========
+  const translations = {
+    en: {
+      landingTitle: "Join Us for Free",
+      landingDesc: "The strongest trades on the Quotex platform",
+      connectSubtext: "Follow on Telegram",
+      followUs: "Follow us on",
+      platformTitle: "Elite Traders Platform",
+      platformDesc: "Browse top traders and follow their signals live",
+      winningTrades: "Winning Trades",
+      losingTrades: "Losing Trades",
+      activeTraders: "Active Traders",
+      totalUsers: "Total Users",
+      followers: "followers",
+      wins: "Wins",
+      losses: "Losses",
+      rating: "Rating",
+      success: "Success",
+      follow: "Follow",
+      following: "Following",
+      navHome: "Home",
+      navTrading: "Trading",
+      navSupport: "Support",
+      liveSignals: "Live Signals Directly",
+      currentTrades: "Current Trades",
+      previousResults: "Previous Results",
+      supportHeader: "Technical Support",
+      supportWelcome: "Hello! How can we help you today?",
+      supportDesc: "You can report an issue or request help with signals.",
+      noFollowingText: "You haven't followed any trader yet",
+      langText: "العربية",
+      timeframe: "Timeframe",
+      indicators: "Indicators",
+      searchPlaceholder: "Search for currency pair..."
+    },
+    ar: {
+      landingTitle: "انضم إلينا مجاناً",
+      landingDesc: "من أقوى الصفقات على منصة كيوتكس",
+      connectSubtext: "متابعة بتلجرام",
+      followUs: "تابعنا على",
+      platformTitle: "منصة المتداولين المميزين",
+      platformDesc: "تصفح أفضل المتداولين وتابع إشاراتهم مباشرة",
+      winningTrades: "صفقات رابحة",
+      losingTrades: "صفقات خاسرة",
+      activeTraders: "متداول نشط",
+      totalUsers: "إجمالي المستخدمين",
+      followers: "متابع",
+      wins: "فوز",
+      losses: "خسارة",
+      rating: "تقييم",
+      success: "نجاح",
+      follow: "متابعة",
+      following: "متابع",
+      navHome: "الرئيسية",
+      navTrading: "التداول",
+      navSupport: "الدعم",
+      liveSignals: "إشارات حية مباشرة",
+      currentTrades: "الصفقات الحالية",
+      previousResults: "النتائج السابقة",
+      supportHeader: "دعم فني",
+      supportWelcome: "مرحباً! كيف يمكننا مساعدتك اليوم؟",
+      supportDesc: "يمكنك الإبلاغ عن مشكلة أو طلب مساعدة بشأن الإشارات.",
+      noFollowingText: "لم تقم بمتابعة أي متداول بعد",
+      langText: "English",
+      timeframe: "الإطار الزمني",
+      indicators: "المؤشرات",
+      searchPlaceholder: "ابحث عن زوج العملات..."
+    }
+  };
+  // ========== STATE ==========
+  let currentView = 'landing';
+  let mainTab = 'home';
+  let currentTrader = null;
+  let currentLang = 'en'; // localStorage not supported
+  const tradersData = [
+    {
+      id: 't1',
+      name: 'أحمد خالد',
+      nameEn: 'Ahmed Khaled',
+      image: 'https://picsum.photos/seed/t1/200/200',
+      followers: 3847,
+      successRate: 92,
+      isFollowing: false,
+      social: { telegram: 'https://t.me/ahmed', instagram: 'https://instagram.com/ahmed', tiktok: 'https://tiktok.com/@ahmed' },
+      wins: 124,
+      losses: 11,
+      likes: 234,
+      dislikes: 12,
+      chartData: [20, 35, 50, 65, 80, 90, 95],
+      chartType: 'success'
+    },
+    {
+      id: 't2',
+      name: 'سارة العمري',
+      nameEn: 'Sara Al-Omari',
+      image: 'https://picsum.photos/seed/t2/200/200',
+      followers: 2156,
+      successRate: 78,
+      isFollowing: false,
+      social: { instagram: 'https://instagram.com/sarah', tiktok: 'https://tiktok.com/@sarah' },
+      wins: 96,
+      losses: 27,
+      likes: 156,
+      dislikes: 8,
+      chartData: [30, 45, 60, 70, 75, 80, 85],
+      chartType: 'success'
+    },
+    {
+      id: 't3',
+      name: 'محمد علي',
+      nameEn: 'Mohammed Ali',
+      image: 'https://picsum.photos/seed/t3/200/200',
+      followers: 5123,
+      successRate: 65,
+      isFollowing: true,
+      social: { telegram: 'https://t.me/mohammed', tiktok: 'https://tiktok.com/@mohammed' },
+      wins: 143,
+      losses: 77,
+      likes: 89,
+      dislikes: 3,
+      chartData: [95, 85, 70, 60, 50, 40, 30],
+      chartType: 'failure'
+    },
+    {
+      id: 't4',
+      name: 'نورة السالم',
+      nameEn: 'Noura Al-Salem',
+      image: 'https://picsum.photos/seed/t4/200/200',
+      followers: 1892,
+      successRate: 85,
+      isFollowing: false,
+      social: { facebook: 'https://facebook.com/noura', instagram: 'https://instagram.com/noura', tiktok: 'https://tiktok.com/@noura' },
+      wins: 102,
+      losses: 18,
+      likes: 178,
+      dislikes: 15,
+      chartData: [25, 40, 55, 70, 80, 85, 90],
+      chartType: 'success'
+    }
+  ];
+  // ========== LANGUAGE FUNCTIONS ==========
+  function applyLanguage(lang) {
+    currentLang = lang;
+    // Update HTML attributes
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    // Apply translations
+    const t = translations[lang];
+    Object.keys(t).forEach(key => {
+      const element = document.getElementById(key);
+      if (element) {
+        element.textContent = t[key];
+      }
+    });
+    document.getElementById('tradeSearch').placeholder = t.searchPlaceholder;
+    document.getElementById('timeframeBtn').textContent = t.timeframe;
+    document.getElementById('indicatorsBtn').textContent = t.indicators;
+
+    // Re-render dynamic content
+    if (currentView === 'dashboard') {
+      renderTradersList();
+      renderTradeSignals();
+    }
+  }
+  // ========== INIT ==========
+  document.getElementById('connectBtn').addEventListener('click', () => {
+    currentView = 'dashboard';
+    document.getElementById('landingPage').style.display = 'none';
+    document.getElementById('dashboard').classList.add('active');
+    renderTradersList();
+    renderTradeSignals();
+  });
+  document.getElementById('langToggle').addEventListener('click', () => {
+    const newLang = currentLang === 'en' ? 'ar' : 'en';
+    applyLanguage(newLang);
+  });
+  // Apply saved language on load
+  applyLanguage(currentLang);
+  // ========== NAVIGATION ==========
+  function showMainTab(tabName) {
+    mainTab = tabName;
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    // Clear badges when viewed
+    if (tabName === 'trading') {
+      document.getElementById('tradingBadge').classList.add('hidden');
+    } else if (tabName === 'support') {
+      document.getElementById('supportBadge').classList.add('hidden');
+    }
+    if (tabName === 'home') {
+      document.getElementById('homeTab').classList.add('active');
+      document.querySelectorAll('.nav-item')[0].classList.add('active');
+      renderTradersList();
+    } else if (tabName === 'trading') {
+      document.getElementById('tradingTab').classList.add('active');
+      document.querySelectorAll('.nav-item')[1].classList.add('active');
+      renderTradeSignals();
+    } else if (tabName === 'support') {
+      document.getElementById('supportTab').classList.add('active');
+      document.querySelectorAll('.nav-item')[2].classList.add('active');
+    }
+  }
+// ========== CHARTS ==========
+function renderMiniChart(canvasId, data, type) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(() => ''),
+      datasets: [{
+        data,
+        borderColor: type === 'success' ? '#22c55e' : '#ef4444',
+        backgroundColor: type === 'success' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: { display: false },
+        y: { display: false, min: 0, max: 100 }
+      },
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 0 }
+    }
+  });
+}
+  // ========== TRADERS LIST ==========
+  function renderTradersList() {
+    const container = document.getElementById('tradersList');
+    container.innerHTML = '';
+    tradersData.forEach(trader => {
+      const successClass = trader.successRate >= 80 ? 'high' : trader.successRate >= 60 ? 'medium' : 'low';
+      const rating = trader.likes + trader.dislikes > 0 ? Math.round((trader.likes / (trader.likes + trader.dislikes)) * 100) : 0;
+      const displayName = currentLang === 'ar' ? trader.name : trader.nameEn;
+      const t = translations[currentLang];
+      const card = document.createElement('div');
+      card.className = 'trader-card';
+      card.innerHTML = `
+        <div class="trader-header">
+          <img src="${trader.image}" alt="${displayName}" class="trader-profile-img">
+          <h3 class="font-bold text-white">${displayName}</h3>
+        </div>
+        <p class="text-gray-400 text-xs">${trader.followers.toLocaleString()} ${t.followers}</p>
+        <div class="flex justify-between text-xs text-gray-300">
+          <span>${t.wins}: ${trader.wins}</span>
+          <span>${t.losses}: ${trader.losses}</span>
+        </div>
+        <div class="flex justify-between text-xs text-gray-300">
+          <span>${t.rating}: ${rating}%</span>
+          <span>${t.success}: ${trader.successRate}%</span>
+        </div>
+        <div class="success-rate-bar">
+          <div class="success-rate-fill ${successClass}" style="width: ${trader.successRate}%"></div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-${trader.id}" class="mini-chart"></canvas>
+        </div>
+        <div class="actions-section">
+          <div class="reactions-and-follow">
+            <div class="reaction-btns">
+              <div class="reaction-item">
+                <button class="reaction-btn ${trader.userReaction === 'like' ? 'active like' : ''}" onclick="reactToTraderOnCard('${trader.id}', 'like', event)">
+                  <i class="fas fa-thumbs-up"></i>
+                </button>
+                <span class="text-xs">${rating}%</span>
+              </div>
+              <div class="reaction-item">
+                <button class="reaction-btn ${trader.userReaction === 'dislike' ? 'active dislike' : ''}" onclick="reactToTraderOnCard('${trader.id}', 'dislike', event)">
+                  <i class="fas fa-thumbs-down"></i>
+                </button>
+                <span class="text-xs">${100 - rating}%</span>
+              </div>
+            </div>
+            <button class="follow-btn-small ${trader.isFollowing ? 'following' : ''}" onclick="toggleFollow('${trader.id}', event)">
+              ${trader.isFollowing ? t.following : t.follow}
+            </button>
+          </div>
+          <div class="social-icons">
+            ${trader.social.instagram ? '<div class="social-icon"><i class="fab fa-instagram"></i></div>' : ''}
+            ${trader.social.tiktok ? '<div class="social-icon"><i class="fab fa-tiktok"></i></div>' : ''}
+            ${trader.social.telegram ? '<div class="social-icon"><i class="fab fa-telegram"></i></div>' : ''}
+          </div>
+        </div>
+      `;
+      card.addEventListener('click', () => showTraderSignals(trader.id));
+      container.appendChild(card);
+      setTimeout(() => {
+        renderMiniChart(`chart-${trader.id}`, trader.chartData, trader.chartType);
+      }, 10);
+    });
+  }
+  function toggleFollow(traderId, event) {
+    event.stopPropagation();
+    const trader = tradersData.find(t => t.id === traderId);
+    trader.isFollowing = !trader.isFollowing;
+    renderTradersList();
+  }
+  function reactToTraderOnCard(traderId, type, event) {
+    event.stopPropagation();
+    const trader = tradersData.find(t => t.id === traderId);
+    if (trader.userReaction === type) {
+      if (type === 'like') trader.likes--;
+      else trader.dislikes--;
+      trader.userReaction = null;
+    } else {
+      if (trader.userReaction === 'like') trader.likes--;
+      if (trader.userReaction === 'dislike') trader.dislikes--;
+      if (type === 'like') {
+        trader.likes++;
+        trader.userReaction = 'like';
+      } else {
+        trader.dislikes++;
+        trader.userReaction = 'dislike';
+      }
+    }
+    renderTradersList();
+  }
+  // ========== TRADING SIGNALS ==========
+  function renderTradeSignals() {
+    const container = document.getElementById('tradeSignalsContainer');
+    container.innerHTML = '';
+    const signals = [
+      { pair: 'EUR/USD', type: 'SELL', entry: '1.08450', time: '5M', countdown: '60s' },
+      { pair: 'GBP/JPY', type: 'BUY', entry: '185.230', time: '1M', countdown: '30s' },
+      { pair: 'AUD/USD', type: 'SELL', entry: '0.65420', time: '15M', countdown: '120s' }
+    ];
+    signals.forEach(signal => {
+      const card = document.createElement('div');
+      card.className = `trade-card ${signal.type.toLowerCase()}`;
+      card.innerHTML = `
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-black text-white font-mono text-lg">${signal.pair}</h3>
+            <div class="flex items-center gap-2 mt-1">
+              <i class="fas fa-clock text-gray-400 text-xs"></i>
+              <span class="text-gray-300 font-bold text-xs">${signal.time}</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 rounded font-bold text-xs ${signal.type === 'BUY' ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}">
+            ${signal.type === 'BUY' ? 'CALL Buy' : 'PUT Drop'}
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3 bg-black/30 p-2 rounded-lg">
+          <div class="text-center border-l border-gray-800">
+            <p class="text-gray-500 text-xs mb-1">Entry Price</p>
+            <p class="font-mono font-bold text-sm text-white">${signal.entry}</p>
+          </div>
+          <div class="text-center">
+            <p class="text-gray-500 text-xs mb-1">Time Remaining</p>
+            <p class="font-mono font-bold text-sm text-yellow-500">${signal.countdown}</p>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+  // ========== TRADER SIGNALS VIEW ==========
+  function showTraderSignals(traderId) {
+    currentTrader = traderId;
+    const trader = tradersData.find(t => t.id === traderId);
+    const displayName = currentLang === 'ar' ? trader.name : trader.nameEn;
+    document.getElementById('signalsTraderImage').src = trader.image;
+    document.getElementById('signalsTraderName').textContent = displayName;
+    renderTraderActiveSignals();
+    renderTraderSignalsHistory();
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('traderSignalsTab').classList.add('active');
+    document.getElementById('headerTitle').textContent = `${translations[currentLang].liveSignals.split(' ')[0]} ${displayName}`;
+  }
+  function showTraderSignalsSubTab(type) {
+    const activeBtn = document.getElementById('activeTraderSignalsBtn');
+    const historyBtn = document.getElementById('historyTraderSignalsBtn');
+    const activeContent = document.getElementById('activeTraderSignals');
+    const historyContent = document.getElementById('traderSignalsHistory');
+    if (type === 'active') {
+      activeBtn.classList.add('active');
+      historyBtn.classList.remove('active');
+      activeContent.style.display = 'block';
+      historyContent.style.display = 'none';
+    } else {
+      activeBtn.classList.remove('active');
+      historyBtn.classList.add('active');
+      activeContent.style.display = 'none';
+      historyContent.style.display = 'block';
+    }
+  }
+  function renderTraderActiveSignals() {
+    document.getElementById('traderActiveSignalsList').innerHTML = `
+      <div class="trade-card sell">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="font-black text-white font-mono text-lg">EUR/USD</h3>
+            <div class="flex items-center gap-2 mt-1">
+              <i class="fas fa-clock text-gray-400 text-xs"></i>
+              <span class="text-gray-300 font-bold text-xs">5M</span>
+            </div>
+          </div>
+          <span class="px-2 py-1 rounded font-bold text-xs bg-red-900/50 text-red-300">PUT Drop</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-3 bg-black/30 p-2 rounded-lg">
+          <div class="text-center border-l border-gray-800">
+            <p class="text-gray-500 text-xs mb-1">Entry Price</p>
+            <p class="font-mono font-bold text-sm text-white">1.08450</p>
+          </div>
+          <div class="text-center">
+            <p class="text-gray-500 text-xs mb-1">Time Remaining</p>
+            <p class="font-mono font-bold text-sm text-yellow-500">90s</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  function renderTraderSignalsHistory() {
+    document.getElementById('traderSignalsHistoryList').innerHTML = `
+      <div class="trade-card buy">
+        <div class="flex justify-between">
+          <div>
+            <h4 class="font-black text-white font-mono">EUR/USD</h4>
+            <p class="text-blue-200/50 text-xs font-mono">09:45 AM</p>
+          </div>
+          <div class="text-right">
+            <span class="font-black text-green-400">+ $320.00</span>
+            <p class="text-xs text-green-600">Profit 85%</p>
+          </div>
+        </div>
+      </div>
+      <div class="trade-card sell">
+        <div class="flex justify-between">
+          <div>
+            <h4 class="font-black text-white font-mono">GBP/USD</h4>
+            <p class="text-blue-200/50 text-xs font-mono">08:30 AM</p>
+          </div>
+          <div class="text-right">
+            <span class="font-black text-red-400">- $150.00</span>
+            <p class="text-xs text-red-600">Loss 15%</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  // ========== SUPPORT CHAT ==========
+  function sendSupportMessage() {
+    const input = document.getElementById('supportMessageInput');
+    const message = input.value.trim();
+    if (message) {
+      const messagesContainer = document.getElementById('supportMessages');
+      const messageEl = document.createElement('div');
+      messageEl.className = 'support-message sent';
+      messageEl.textContent = message;
+      messagesContainer.appendChild(messageEl);
+      input.value = '';
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  }
+</script>
+</body>
+</html>
+
